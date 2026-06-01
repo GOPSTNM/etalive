@@ -1,0 +1,147 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap");
+body {
+    background-color: #F0FFFF;
+    font-family: "Roboto", "Noto Serif HK";
+    font-weight: 580;
+}
+h1 {
+    font-size: 30px;
+    color: #191970;
+    font-weight: 700;
+}
+p {
+    font-size: 20px;
+    color: #191970;
+}
+input[type=button] {
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 2px;
+    height: 45px;
+    width: 300px;
+    background-color: #FF8C00;
+    color: #FFFFFF;
+    font-size: 20px;
+    border: 2px solid #FF8C00;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+}
+input[type=text] {
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 2px;
+    height: 45px;
+    width: 300px;
+    background-color: #FFFFFF;
+    color: #000000;
+    font-size: 20px;
+    border: 2px solid #FF8C00;
+    border-radius: 8px;
+    transition: 0.5s;
+    outline: none;
+    text-align: left;
+    padding-left: 10px;
+    cursor: text;
+}
+select {
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 2px;
+    height: 45px;
+    width: 300px;
+    background-color: #FFFFFF;
+    color: #000000;
+    font-size: 20px;
+    border: 2px solid #FF8C00;
+    border-radius: 8px;
+    transition: 0.5s;
+    outline: none;
+    text-align: left;
+    padding-left: 10px;
+    cursor: pointer;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    -ms-progress-appearance: none;
+}
+select:invalid {
+    color: #8C8C8C;
+}
+input[type=text]:focus, select:focus {
+    border: 2px solid #1A7CDB;
+}
+.text_small {
+    font-size: 12px;
+}
+.text_bold {
+    color: #333333;
+    font-weight: 700;
+}
+.text_medium {
+    font-size: 17px;
+}
+.text_desc {
+    color: #8C8C8C;
+    font-size: 15px;
+}
+table.eta_data {
+    border: none;
+    margin: 0px;
+    table-layout: fixed;
+    width: fit-content;
+}
+table.eta_data tr {
+    font-size: 22px;
+    color: #333333;
+    height: 30px;
+    line-height: 20px;
+}
+.circle_y {
+    flex-shrink: 0;
+    height: 18px;
+    width: 18px;
+    border-radius: 100%;
+    border: 2.5px solid #000000;
+    display: inline-block;
+    background-color: #FFE100;
+}
+.circle_g {
+    flex-shrink: 0;
+    height: 18px;
+    width: 18px;
+    border-radius: 100%;
+    border: 2.5px solid #8C8C8C;
+    display: inline-block;
+    background-color: #FFFFFF;
+}
+.stop_disp {
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+.stop_disp_name {
+    margin: 5px 0px 5px 10px;
+}
+.window_disp {
+    outline: none;
+    background-color: #F0FFFF;
+    border: 2.5px solid #191970;
+    border-radius: 10px;
+    height: clamp(50vh, min-content, 70vh);
+    width: clamp(400px, 75vw, 100vw);
+    padding: 0px;
+}
+.window_disp::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.window_disp_elem {
+    padding: 15px;
+}
+.window_disp_title {
+    margin: 0px;
+}
+.window_disp_title_text {
+    display: inline-block;
+}
