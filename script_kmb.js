@@ -110,13 +110,14 @@ async function stop_eta_update(stop_id) {
     eta_data["data"].forEach((i) => {
         if (i["eta"]) {
             if (!eta_sorted[`${i["route"]}${i["dir"]}`]){
-                eta_sorted[`${i["route"]}${i["dir"]}`] = [[i["service_type"], i["dest_en"]]];
+                eta_sorted[`${i["route"]}${i["dir"]}`] = [[i["service_type"], i["dest_en"]], {}];
             }
             if (!eta_sorted[`${i["route"]}${i["dir"]}`][0].includes(i["dest_en"])) {
                 eta_sorted[`${i["route"]}${i["dir"]}`][0].push(i["dest_en"]);
             }
             if (eta_sorted[`${i["route"]}${i["dir"]}`][0][0] === i["service_type"]) {
-                eta_sorted[`${i["route"]}${i["dir"]}`].push([i["eta"], i["rmk_en"], i["rmk_tc"]]);
+                // Consider ETA
+                eta_sorted[`${i["route"]}${i["dir"]}`][1][i["seq"]] = [i["eta"], i["rmk_en"], i["rmk_tc"]];
             }
         } else {
         }
