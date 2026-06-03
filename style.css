@@ -86,11 +86,16 @@ input[type=text]:focus, select:focus {
     color: #8C8C8C;
     font-size: 15px;
 }
+.margin_bottom {
+    margin: 0px 0px 5px 0px !important;
+}
+.margin_none {
+    margin: 0px !important;
+}
 table.eta_data {
     border: none;
-    margin: 0px;
     table-layout: fixed;
-    width: fit-content;
+    width: calc(100%);
 }
 table.eta_data tr {
     font-size: 22px;
@@ -139,9 +144,6 @@ table.eta_data tr {
 .window_disp_elem {
     padding: 15px;
 }
-.window_disp_title {
-    margin: 0px;
-}
-.window_disp_title_text {
+.title_inline_block {
     display: inline-block;
 }

@@ -1,6 +1,7 @@
 const api_base = "https://data.etabus.gov.hk/v1/transport/kmb";
 let route_data = {};
 let eta_data = {};
+let route_total_stops = {};
 setup();
 async function setup() {
     route_data = await local_storage_item("kmb_rte_data", api_base + "/route/", 7);
@@ -98,33 +99,83 @@ async function stop_eta_update(stop_id) {
     let dialog_results = "";
     const stop_name_data = await local_storage_item(`kmb_stop/${stop_id}`, `${api_base}/stop/${stop_id}`, 7);
     const stop_name = [stop_id, proper_stop_name(stop_name_data["data"]["name_en"]), proper_stop_name(stop_name_data["data"]["name_tc"]), stop_name_data["data"]["lat"], stop_name_data["data"]["long"]];
-    dialog_results += "<p class='window_disp_title'>";
-    dialog_results += `<span class='window_disp_title_text'>${stop_name[1][0]}</span> `;
-    dialog_results += `<span class='window_disp_title_text'>${stop_name[2][0]}</span> `;
-    dialog_results += `<span class='window_disp_title_text text_desc'>${stop_name[1][1]}</span>`;
-    dialog_results += "</p>";
+    dialog_results += `<span class='title_inline_block'>${stop_name[1][0]}</span> `;
+    dialog_results += `<span class='title_inline_block'>${stop_name[2][0]}</span> `;
+    dialog_results += `<span class='title_inline_block text_desc'>${stop_name[1][1]}</span>`;
+    document.getElementById("stop_eta_disp_title").innerHTML = dialog_results;
+    document.getElementById("stop_eta_disp_eta").replaceChildren();
+    document.getElementById("stop_eta_disp_eta").innerHTML = "<p class='text_bold'>Please wait.</p>";
+    show_stop_dialog(true);
+    stop_eta_display(stop_id, await stop_eta_fetch(stop_id));
+}
+async function stop_eta_fetch(stop_id) {
     const eta_data = await (await fetch(`${api_base}/stop-eta/${stop_id}`)).json();
-    let eta_sorted = {};
-    let inactive_sorted = {};
-    console.log(eta_data);
+    let eta_presort = {};
+    let eta_rd = {};
     eta_data["data"].forEach((i) => {
-        if (i["eta"]) {
-            if (!eta_sorted[`${i["route"]}${i["dir"]}`]){
-                eta_sorted[`${i["route"]}${i["dir"]}`] = [[i["service_type"], i["dest_en"]], {}];
+        console.log(i);
+        const rd_string = `${i["route"]}${i["dir"]}`;
+        const sub_data_id = `${i["route"]}/${i["dir"]}/${i["service_type"]}/${i["seq"]}`;
+        if (!eta_rd[rd_string]) {
+            const dest_string = proper_stop_name(i["dest_en"])[0];
+            eta_rd[rd_string] = [i["service_type"], [dest_string]];
+            let sort_status = 0;
+            if (!i["eta"]) {
+                if (!i["rmk_en"]) {
+                    sort_status = 3;
+                } else {
+                    sort_status = 2;
+                }
             }
-            if (!eta_sorted[`${i["route"]}${i["dir"]}`][0].includes(i["dest_en"])) {
-                eta_sorted[`${i["route"]}${i["dir"]}`][0].push(i["dest_en"]);
-            }
-            if (eta_sorted[`${i["route"]}${i["dir"]}`][0][0] === i["service_type"]) {
-                // Consider ETA
-                eta_sorted[`${i["route"]}${i["dir"]}`][1][i["seq"]] = [i["eta"], i["rmk_en"], i["rmk_tc"]];
+            const seq = i["seq"];
+            const eta_list = [[i["eta"], i["rmk_en"], i["rmk_tc"]]];
+            eta_presort[sub_data_id] = [sort_status, seq, eta_list];
+        } else if (eta_rd[rd_string][0] === i["service_type"]) {
+            const eta_list = [i["eta"], i["rmk_en"], i["rmk_tc"]];
+            if (!eta_presort[sub_data_id]) {
+                const seq = i["seq"];
+                eta_presort[sub_data_id] = [0, seq, [eta_list]];
+            } else {
+                eta_presort[sub_data_id][2].push(eta_list);
             }
         } else {
+            const dest_string = proper_stop_name(i["dest_en"])[0];
+            if (!eta_rd[rd_string][1].includes(dest_string)) {
+                eta_rd[rd_string][1].push(dest_string);
+            }
         }
-    }); 
-    console.log(eta_sorted);
-    document.getElementById("stop_eta_disp_elem").innerHTML = dialog_results;
-    show_stop_dialog(true);
+    });
+    const eta_sorted = Object.entries(eta_presort).sort((a, b) => {
+        return a[1][0] - b[1][0];
+    });
+    return [eta_sorted, eta_rd];
+}
+function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
+    let results = "<table class='eta_data'>";
+    for (const i of eta_sorted) {
+        const sub_data = i[0].split("/");
+        const dest_string = eta_rd[`${sub_data[0]}${sub_data[1]}`][1].join("/ ");
+        const rte_dest_table = `${sub_data[0]} <span class="text_medium title_inline_block">${dest_string}</span>`
+        const display_type = i[1][0];
+        if (display_type === 0) {
+            let eta_disp_content = "";
+            for (const k of i[1][2]) {
+                const eta_time = k[0];
+                const eta_time_mins = time_difference_format(eta_time);
+                const time_data = `<span class="text_bold">${eta_time_mins}</span> <span class="text_small">min</span>`;
+                eta_disp_content += `<td>${time_data}</td>`;
+            }
+            results += `<tr><td>${rte_dest_table}</td>${eta_disp_content}</tr>`;
+        } else if (display_type === 2) {
+            results += `<tr><td>${rte_dest_table}</td><td colspan="3">${i[1][2][0][1]}</td></tr>`;
+        } else {
+            results += `<tr><td>${rte_dest_table}</td><td colspan="3">No Service</td></tr>`;
+        }
+    }
+    results += "</table>";
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(results, "text/html");
+    document.getElementById("stop_eta_disp_eta").replaceChildren(doc.body.firstChild);
 }
 function window_disp_click(e) {
     const wrapper = document.querySelector(".window_disp_elem");
@@ -147,18 +198,18 @@ function time_difference_format(t) {
     return Math.round((new Date(t) - new Date())/6000)/10;
 }
 function stop_click(i) {
-    if (document.getElementById(`${i}_table`)) {
-        document.getElementById(`${i}_table`).remove();
+    if (document.getElementById(`stop_table_${i}`)) {
+        document.getElementById(`stop_table_${i}`).remove();
         return;
     }
     let results = "";
     if (eta_data[i]) {
-        results += `<div id='${i}_table'>`;
+        results += `<div class="margin_bottom" id="stop_table_${i}">`;
         results += "<table class='eta_data'>";
         stop_eta_data = eta_data[i];
         for (let k = 0; k < stop_eta_data.length; k++) {
-            let eta_time = stop_eta_data[k][0];
-            let eta_time_mins = time_difference_format(eta_time);
+            const eta_time = stop_eta_data[k][0];
+            const eta_time_mins = time_difference_format(eta_time);
             let time_data = "";
             if (i == 0 || i == eta_data.length - 1) {
             time_data = `<span class="text_bold">${eta_time_mins}</span> <span class="text_small">min</span>`;
@@ -175,9 +226,9 @@ function stop_click(i) {
             results += `<td style="width: 130px">${time_show_format(eta_time)}</td>`;
             results += `<td style="width: 100px">${time_data}</td>`;
             if (stop_eta_data[k][1]) {
-                results += `<td style="width: calc(100vw - 230px)"><span class='text_medium'>${stop_eta_data[k][1]}</span></td>`;
+                results += `<td style="width: calc(100% - 230px)"><span class='text_medium'>${stop_eta_data[k][1]}</span></td>`;
             } else {
-                results += "<td style='width: calc(100vw - 230px)'></td>";
+                results += "<td style='width: calc(100% - 230px)'></td>";
             }
             results += "</tr>";
         }

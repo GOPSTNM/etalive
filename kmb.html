@@ -2,20 +2,25 @@
 <html lang="en-GB">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KMB Arrival Time</title>
+    <title>KMB Arrival Times</title>
     <link rel="stylesheet" href="style.css">
     <script src="script_kmb.js" defer></script>
   </head>
   <body>
-    <h1>KMB Arrival Time</h1>
+    <h1>KMB Arrival Times</h1>
     <p>Please input route and select direction.</p>
     <input type="text" oninput="rte_input_change();" id="rte_input" autocapitalize="characters" placeholder="Enter Route">
     <select id="rte_options_select" required></select>
     <input type="button" onclick="update();" value="Update">
     <div id="results"></div>
+    <p class="text_medium">Click on the stop name to check the arrival times. Click on the stop circle to check the arrival times of all routes at that stop pole.</p>
     <p class="text_desc">The information is provided by the Digital Policy Office and for reference only.</p>
     <dialog id="stop_eta_disp" onclick="window_disp_click(event);" class="window_disp">
-      <div id="stop_eta_disp_elem" class="window_disp_elem"></div>
+      <div id="stop_eta_disp_elem" class="window_disp_elem">
+        <p class="margin_none" id="stop_eta_disp_title"></p>
+        <div id="stop_eta_disp_eta"></div>
+        <p class="text_desc margin_none">Click outside the box to exit.</p>
+      </div>
     </dialog>
   </body>
 </html>
