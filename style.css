@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=:wght@200..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap");
 body {
     background-color: #F0FFFF;
@@ -6,13 +6,33 @@ body {
     font-weight: 580;
 }
 h1 {
-    font-size: 30px;
+    font-size: 1.875rem;
     color: #191970;
     font-weight: 700;
 }
 p {
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #191970;
+}
+.text_small {
+    font-size: 0.75rem;
+}
+.text_bold {
+    color: #333333;
+    font-weight: 700;
+}
+.text_medium {
+    font-size: 1.0625rem;
+}
+.text_desc {
+    color: #8C8C8C;
+    font-size: 0.9375rem;
+}
+.margin_bottom {
+    margin: 0px 0px 5px 0px;
+}
+.margin_none {
+    margin: 0px;
 }
 input[type=button] {
     display: inline-block;
@@ -72,30 +92,10 @@ select:invalid {
 input[type=text]:focus, select:focus {
     border: 2px solid #1A7CDB;
 }
-.text_small {
-    font-size: 12px;
-}
-.text_bold {
-    color: #333333;
-    font-weight: 700;
-}
-.text_medium {
-    font-size: 17px;
-}
-.text_desc {
-    color: #8C8C8C;
-    font-size: 15px;
-}
-.margin_bottom {
-    margin: 0px 0px 5px 0px !important;
-}
-.margin_none {
-    margin: 0px !important;
-}
 table.eta_data {
     border: none;
     table-layout: fixed;
-    width: calc(100%);
+    width: fit-content;
 }
 table.eta_data tr {
     font-size: 22px;
@@ -134,15 +134,16 @@ table.eta_data tr {
     background-color: #F0FFFF;
     border: 2.5px solid #191970;
     border-radius: 10px;
-    height: clamp(50vh, min-content, 70vh);
-    width: clamp(400px, 75vw, 100vw);
+    max-height: 90vh;
+    width: max(500px, 75vw);
+    max-width: 90vw;
     padding: 0px;
 }
 .window_disp::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
 }
 .window_disp_elem {
-    padding: 15px;
+    padding: 12px;
 }
 .title_inline_block {
     display: inline-block;

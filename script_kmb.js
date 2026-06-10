@@ -1,10 +1,10 @@
 const api_base = "https://data.etabus.gov.hk/v1/transport/kmb";
 let route_data = {};
 let eta_data = {};
-let route_total_stops = {};
+let route_terminus_index = {};
 setup();
 async function setup() {
-    route_data = await local_storage_item("kmb_rte_data", api_base + "/route/", 7);
+    route_data = await local_storage_item("kmb_rte_data", `${api_base}/route/`, 7);
     const url_params = new URLSearchParams(window.location.search);
     if (url_params.has("r")) {
         document.getElementById("rte_input").value = url_params.get("r");
@@ -104,44 +104,66 @@ async function stop_eta_update(stop_id) {
     dialog_results += `<span class='title_inline_block text_desc'>${stop_name[1][1]}</span>`;
     document.getElementById("stop_eta_disp_title").innerHTML = dialog_results;
     document.getElementById("stop_eta_disp_eta").replaceChildren();
-    document.getElementById("stop_eta_disp_eta").innerHTML = "<p class='text_bold'>Please wait.</p>";
+    document.getElementById("stop_eta_disp_eta").innerHTML = "<p class='text_bold'>Please wait</p>";
     show_stop_dialog(true);
     stop_eta_display(stop_id, await stop_eta_fetch(stop_id));
+}
+async function find_terminus_index(route, bound, service_type) {
+    const object_key = `${route}/${bound}/${service_type}`;
+    if (route_terminus_index[object_key]) {
+        return route_terminus_index[object_key];
+    } else {
+        const stop_data_url = `${api_base}/route-stop/${route}/${bound == "I" ? "inbound" : "outbound"}/${service_type}`;
+        const stop_data = await local_storage_item(`kmb_rte_stop_list/${route}/${bound}/${service_type}`, stop_data_url, 7);
+        const seq_values = stop_data["data"].map(item => item["seq"]);
+        const terminus_index = Math.max(...seq_values);
+        route_terminus_index[object_key] = terminus_index;
+        return terminus_index;
+    }
 }
 async function stop_eta_fetch(stop_id) {
     const eta_data = await (await fetch(`${api_base}/stop-eta/${stop_id}`)).json();
     let eta_presort = {};
     let eta_rd = {};
     eta_data["data"].forEach((i) => {
-        console.log(i);
-        const rd_string = `${i["route"]}${i["dir"]}`;
-        const sub_data_id = `${i["route"]}/${i["dir"]}/${i["service_type"]}/${i["seq"]}`;
+        const rd_string = `${i["route"]}/${i["dir"]}`;
+        const sub_data_id = `${i["route"]}/${i["dir"]}/${i["seq"]}`;
+        const dest_string = proper_stop_name(i["dest_en"])[0];
         if (!eta_rd[rd_string]) {
-            const dest_string = proper_stop_name(i["dest_en"])[0];
-            eta_rd[rd_string] = [i["service_type"], [dest_string]];
-            let sort_status = 0;
-            if (!i["eta"]) {
-                if (!i["rmk_en"]) {
-                    sort_status = 3;
-                } else {
-                    sort_status = 2;
-                }
-            }
-            const seq = i["seq"];
-            const eta_list = [[i["eta"], i["rmk_en"], i["rmk_tc"]]];
-            eta_presort[sub_data_id] = [sort_status, seq, eta_list];
-        } else if (eta_rd[rd_string][0] === i["service_type"]) {
+            eta_rd[rd_string] = {st: i["service_type"], dest: [dest_string]};
+        }
+        if (eta_rd[rd_string]["st"] === i["service_type"]) {
+            // consider add eta data
             const eta_list = [i["eta"], i["rmk_en"], i["rmk_tc"]];
+            let display_type = 0;
+            if (!i["eta"]) {
+                if (i["rmk_en"]) {
+                    display_type = 2;
+                } else {
+                    display_type = 3;
+                }
+            } else {
+                find_terminus_index(i["route"], i["dir"], i["service_type"])
+                .then(response => {
+                    return response;
+                })
+                .then(data => {
+                    if (data === i["seq"]) {
+                        display_type = 1;
+                    }
+                });
+            }
+            console.log(display_type);
             if (!eta_presort[sub_data_id]) {
                 const seq = i["seq"];
-                eta_presort[sub_data_id] = [0, seq, [eta_list]];
+                eta_presort[sub_data_id] = [display_type, [eta_list]];
             } else {
-                eta_presort[sub_data_id][2].push(eta_list);
+                eta_presort[sub_data_id][1].push(eta_list);
             }
         } else {
-            const dest_string = proper_stop_name(i["dest_en"])[0];
-            if (!eta_rd[rd_string][1].includes(dest_string)) {
-                eta_rd[rd_string][1].push(dest_string);
+            // add dest if not repeat
+            if (!eta_rd[rd_string]["dest"].includes(dest_string)) {
+                eta_rd[rd_string]["dest"].push(dest_string);
             }
         }
     });
@@ -154,12 +176,15 @@ function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
     let results = "<table class='eta_data'>";
     for (const i of eta_sorted) {
         const sub_data = i[0].split("/");
-        const dest_string = eta_rd[`${sub_data[0]}${sub_data[1]}`][1].join("/ ");
-        const rte_dest_table = `${sub_data[0]} <span class="text_medium title_inline_block">${dest_string}</span>`
+        const dest_string = eta_rd[`${sub_data[0]}/${sub_data[1]}`]["dest"].join("/ ");
+        let rte_dest_table = `${sub_data[0]} <span class="text_medium title_inline_block">${dest_string}</span>`
         const display_type = i[1][0];
-        if (display_type === 0) {
+        if (display_type === 0 || display_type === 1) {
+            if (display_type === 1) {
+                rte_dest_table = `${sub_data[0]} <span class="text_medium title_inline_block">Terminates Here</span>`;
+            }
             let eta_disp_content = "";
-            for (const k of i[1][2]) {
+            for (const k of i[1][1]) {
                 const eta_time = k[0];
                 const eta_time_mins = time_difference_format(eta_time);
                 const time_data = `<span class="text_bold">${eta_time_mins}</span> <span class="text_small">min</span>`;
@@ -167,7 +192,7 @@ function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
             }
             results += `<tr><td>${rte_dest_table}</td>${eta_disp_content}</tr>`;
         } else if (display_type === 2) {
-            results += `<tr><td>${rte_dest_table}</td><td colspan="3">${i[1][2][0][1]}</td></tr>`;
+            results += `<tr><td>${rte_dest_table}</td><td colspan="3">${i[1][1][0][1]}</td></tr>`;
         } else {
             results += `<tr><td>${rte_dest_table}</td><td colspan="3">No Service</td></tr>`;
         }
