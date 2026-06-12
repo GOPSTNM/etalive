@@ -6,27 +6,27 @@ body {
     font-weight: 580;
 }
 h1 {
-    font-size: 1.875rem;
+    font-size: 30px;
     color: #191970;
     font-weight: 700;
 }
 p {
-    font-size: 1.25rem;
+    font-size: 20px;
     color: #191970;
 }
 .text_small {
-    font-size: 0.75rem;
+    font-size: 12px;
 }
 .text_bold {
     color: #333333;
     font-weight: 700;
 }
 .text_medium {
-    font-size: 1.0625rem;
+    font-size: 17px;
 }
 .text_desc {
     color: #8C8C8C;
-    font-size: 0.9375rem;
+    font-size: 15px;
 }
 .margin_bottom {
     margin: 0px 0px 5px 0px;
@@ -133,10 +133,11 @@ table.eta_data tr {
     background-color: #F0FFFF;
     border: 2.5px solid #191970;
     border-radius: 10px;
-    max-height: 90vh;
+    max-height: min(90vh, calc(95vh - 15px));
     width: max(500px, 75vw);
     max-width: 90vw;
     padding: 0px;
+    bottom: 15px;
 }
 .window_disp::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
