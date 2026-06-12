@@ -133,11 +133,10 @@ table.eta_data tr {
     background-color: #F0FFFF;
     border: 2.5px solid #191970;
     border-radius: 10px;
-    max-height: min(90vh, calc(95vh - 15px));
+    max-height: min(90vh, calc(95dvh - 40px));
     width: max(500px, 75vw);
     max-width: 90vw;
     padding: 0px;
-    bottom: 15px;
 }
 .window_disp::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
