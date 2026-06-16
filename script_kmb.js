@@ -4,25 +4,39 @@ const name_word_replacements_en = {
     "Ground Transportation Centre": "GTC",
     "GTC": "GTC",
     "II": "II",
-    "HKCECE": "Exhibition Centre",
+    "HKCECE": "Convention & Exhibition Centre",
+    "HKCEC": "Convention & Exhibition Centre",
     "HK": "HK",
     "H.K.": "HK",
     "O'Brien": "O'Brien",
     "EKCC": "EKCC",
     "HACTL": "HACTL",
     "JPC": "JPC",
+    "UC": "UC",
+    "HKSYU": "HKSYU",
+    "DHC": "District Health Centre",
+    "DHL": "DHL",
+    "CAD": "CAD",
+    "HZMB": "HZMB",
+    "HSBC": "HSBC",
+    "AsiaWorld Expo": "AsiaWorld-Expo",
+    "AsiaWorld-Expo": "AsiaWorld-Expo",
+    "HQ": "HQ",
+    "HKFYG": "HKFYG",
+    "Market)": "Market"
 }
 const name_escaped_keys_en = Object.keys(name_word_replacements_en).map(key => key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
-const name_replacements_regex_en = new RegExp(`(?<=^|\\s|\\(|-)${name_escaped_keys_en.join("|")}(?=\\s|\\)|-|$)`, "gi");
+const name_replacements_regex_en = new RegExp(`(?<=^|[\\s()\\-])(${name_escaped_keys_en.join("|")})(?=[\\s()\\-']|$)`, "gi");
 const name_word_replacements_tc = {
+    "DHL": "DHL",
     "II": "II"
 }
 const name_escaped_keys_tc = Object.keys(name_word_replacements_tc).map(key => key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
-const name_replacements_regex_tc = new RegExp(`(?<=^|\\s|\\(|-)${name_escaped_keys_tc.join("|")}(?=\\s|\\)|-|$)`, "gi");
+const name_replacements_regex_tc = new RegExp(`(${name_escaped_keys_tc.join("|")})`, "gi");
 const name_pole_id_regex = /\s\(([A-Z]{2}\d{3}[A-Z]?)\)$/i;
-const name_title_case_regex = /(?<=^|[\s\-()\/])[a-z]/g;
-let route_data = {};
-let eta_data = {};
+const name_title_case_regex = /(?<=^|[\s\-()\/\\.])[a-z]/g;
+let route_data;
+let eta_data;
 let route_terminus_index = {};
 setup();
 async function setup() {
@@ -69,11 +83,14 @@ function rte_input_change() {
     const rte_input = document.getElementById("rte_input").value;
     const rte_options_select = document.getElementById("rte_options_select");
     document.getElementById("rte_input").value = rte_input.toUpperCase();
+    if (!route_data) {
+        return;
+    }
     rte_options_select.innerHTML = "<option value='' selected disabled>Select Direction</option>";
     let rte_first = true;
     for (const rte_data of route_data["data"]) {
         if (rte_data["route"] == rte_input.toUpperCase()) {
-            let rte_str = `${proper_stop_name(rte_data["orig_en"])[0]} to ${proper_stop_name(rte_data["dest_en"])[0]}`
+            let rte_str = `${proper_stop_name_en(rte_data["orig_en"])} to ${proper_stop_name_en(rte_data["dest_en"])}`
             if (rte_data["service_type"] != 1) {
                 rte_str += ` [Spec Dep ${rte_data["service_type"]}]`
             }
@@ -188,6 +205,25 @@ async function find_terminus_index(route, bound, service_type) {
         return terminus_index;
     }
 }
+function window_disp_click(e) {
+    const wrapper = document.querySelector(".window_disp_elem");
+    if (!wrapper.contains(e.target)) {
+        show_stop_dialog(false);
+    }
+}
+function show_stop_dialog(show) {
+    const stop_dialog = document.getElementById("stop_eta_disp");
+    if (show) {
+        stop_dialog.showModal();
+    } else {
+        stop_dialog.close();
+    }
+}
+
+
+
+
+
 
 
 
@@ -199,34 +235,46 @@ async function stop_eta_fetch(stop_id) {
     for (const i of eta_data["data"]) {
         const rd_string = `${i["route"]}/${i["dir"]}`;
         const sub_data_id = `${i["route"]}/${i["dir"]}/${i["seq"]}`;
-        const dest_string = proper_stop_name(i["dest_en"])[0];
+        let main_temp_isterminate = 0;
+        
+        let dest_string = proper_stop_name_en(i["dest_en"]);
+        let display_type = 0;
+        try {
+            const terminus_index = await find_terminus_index(i["route"], i["dir"], i["service_type"]);
+            if (terminus_index === i["seq"]) {
+                dest_string = "Terminates Here";
+                main_temp_isterminate = 1;
+                display_type = 1;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        
+
         if (!eta_rd[rd_string]) {
             eta_rd[rd_string] = {st: i["service_type"], dest: [dest_string]};
         }
         if (eta_rd[rd_string]["st"] === i["service_type"]) {
             // consider add eta data
             const eta_list = [i["eta"], i["rmk_en"], i["rmk_tc"]];
-            let display_type = 0;
-            if (!i["eta"]) {
-                if (i["rmk_en"]) {
-                    display_type = 2;
-                } else {
-                    display_type = 3;
-                }
-            } else {
-                try {
-                    const terminus_index = await find_terminus_index(i["route"], i["dir"], i["service_type"]);
-                    if (terminus_index === i["seq"]) {
-                        display_type = 1;
-                    }
-                } catch (e) {
-                    console.log(e);
-                }
-            }
             if (!eta_presort[sub_data_id]) {
+                if (!i["eta"]) {
+                    if (i["rmk_en"]) {
+                        display_type = 2;
+                    } else {
+                        display_type = 3;
+                    }
+                } else {
+                    if (main_temp_isterminate == 1) {
+                        display_type = 1;
+                    } 
+                }
                 const seq = i["seq"];
                 eta_presort[sub_data_id] = [display_type, [eta_list]];
             } else {
+                if (eta_presort[sub_data_id][0] === 1 && i["eta"]) {
+                    //eta_presort[sub_data_id][0] = 0;
+                }
                 eta_presort[sub_data_id][1].push(eta_list);
             }
         } else {
@@ -241,6 +289,8 @@ async function stop_eta_fetch(stop_id) {
     });
     return [eta_sorted, eta_rd];
 }
+
+
 function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
     console.log(eta_sorted);
     console.log(eta_rd);
@@ -259,9 +309,9 @@ function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
                 const eta_time = k[0];
                 const eta_time_mins = time_difference_format(eta_time);
                 const time_data = `<span class="text_bold">${eta_time_mins}</span> <span class="text_small">min</span>`;
-                eta_disp_content += `<td width="100px">${time_data}</td>`;
+                eta_disp_content += `<td style="width: minmax(60px, 100px)">${time_data}</td>`;
             }
-            results += `<tr><td width="100px">${rte_dest_table}</td>${eta_disp_content}</tr>`;
+            results += `<tr><td style="width: clamp(150px, 25%, 200px); max-width: 50%;">${rte_dest_table}</td>${eta_disp_content}</tr>`;
         } else if (display_type === 2) {
             results += `<tr><td>${rte_dest_table}</td><td colspan="3">${i[1][1][0][1]}</td></tr>`;
         } else {
@@ -273,25 +323,11 @@ function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
     const doc = parser.parseFromString(results, "text/html");
     document.getElementById("stop_eta_disp_eta").replaceChildren(doc.body.firstChild);
 }
-function window_disp_click(e) {
-    const wrapper = document.querySelector(".window_disp_elem");
-    if (!wrapper.contains(e.target)) {
-        show_stop_dialog(false);
-    }
-}
-function show_stop_dialog(show) {
-    const stop_dialog = document.getElementById("stop_eta_disp");
-    if (show) {
-        stop_dialog.showModal();
-    } else {
-        stop_dialog.close();
-    }
-}
 function time_show_format(t) {
     return new Date(t).toTimeString().slice(0, 8);
 }
 function time_difference_format(t) {
-    return Math.round((new Date(t) - new Date())/6000)/10;
+    return Math.round((new Date(t) - new Date())/60000);
 }
 function stop_click(i) {
     if (document.getElementById(`stop_table_${i}`)) {
@@ -335,6 +371,15 @@ function stop_click(i) {
     const doc = parser.parseFromString(results, "text/html");
     document.getElementById("stop_disp_" + i).after(...doc.body.children);
 }
+
+
+
+
+
+
+
+
+
 async function local_storage_item(label, url, validity_period) {
     let data_dictionary = {};
     let return_data;
@@ -350,7 +395,4 @@ async function local_storage_item(label, url, validity_period) {
         localStorage.setItem("kmb_data_dictionary", JSON.stringify(data_dictionary))
     }
     return return_data;
-}
-function proper_stop_name(name) {
-    return [proper_stop_name_en(name),  proper_stop_name_id(name)];
 }
