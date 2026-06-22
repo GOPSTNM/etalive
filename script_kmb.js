@@ -23,7 +23,8 @@ const name_word_replacements_en = {
     "AsiaWorld-Expo": "AsiaWorld-Expo",
     "HQ": "HQ",
     "HKFYG": "HKFYG",
-    "Market)": "Market"
+    "Market)": "Market",
+    "CCC": "CCC"
 }
 const name_escaped_keys_en = Object.keys(name_word_replacements_en).map(key => key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
 const name_replacements_regex_en = new RegExp(`(?<=^|[\\s()\\-])(${name_escaped_keys_en.join("|")})(?=[\\s()\\-']|$)`, "gi");
@@ -35,20 +36,30 @@ const name_escaped_keys_tc = Object.keys(name_word_replacements_tc).map(key => k
 const name_replacements_regex_tc = new RegExp(`(${name_escaped_keys_tc.join("|")})`, "gi");
 const name_pole_id_regex = /\s\(([A-Z]{2}\d{3}[A-Z]?)\)$/i;
 const name_title_case_regex = /(?<=^|[\s\-()\/\\.])[a-z]/g;
-let route_data;
 let eta_data;
 let route_terminus_index = {};
+let route_data;
+let stop_data;
+let route_stop_data;
+let stop_name_data;
 setup();
 async function setup() {
-    route_data = await local_storage_item("kmb_rte_data", `${api_base}/route/`, 7);
-    const url_params = new URLSearchParams(window.location.search);
-    if (url_params.has("r")) {
-        document.getElementById("rte_input").value = url_params.get("r");
-    }
-    rte_input_change();
-    if (url_params.has("d")) {
-        document.getElementById("rte_options_select").value = url_params.get("d");
-        update();
+    try {
+        [route_data] = await Promise.all([
+            local_storage_item("kmb_route_data", `${api_base}/route`, 7),
+        ]);
+    } catch (error) {
+        console.log(error);
+    } finally {
+        const url_params = new URLSearchParams(window.location.search);
+        if (url_params.has("r")) {
+            document.getElementById("rte_input").value = url_params.get("r");
+        }
+        rte_input_change();
+        if (url_params.has("d")) {
+            document.getElementById("rte_options_select").value = url_params.get("d");
+            update();
+        }
     }
 }
 function proper_stop_name_id(name) {
@@ -109,12 +120,17 @@ async function get_stop_name(stop_id) {
     if (data_dictionary[label] && localStorage.getItem(label) && (Date.now() - data_dictionary[label]) < (7 * 86400000)) {
         return_data = JSON.parse(localStorage.getItem(label));
     } else {
-        stop_fetch = await (await fetch(`${api_base}/stop/${stop_id}`)).json();
-        stop_fetch_data = stop_fetch["data"];
-        return_data = [proper_stop_name_en(stop_fetch_data["name_en"]), proper_stop_name_tc(stop_fetch_data["name_tc"]), proper_stop_name_id(stop_fetch_data["name_en"]), stop_fetch_data["lat"], stop_fetch_data["long"]];
-        localStorage.setItem(label, JSON.stringify(return_data));
-        data_dictionary[label] = Date.now();
-        localStorage.setItem("kmb_data_dictionary", JSON.stringify(data_dictionary))
+        try {
+            stop_fetch = await (await fetch(`${api_base}/stop/${stop_id}`)).json();
+            stop_fetch_data = stop_fetch["data"];
+            return_data = [proper_stop_name_en(stop_fetch_data["name_en"]), proper_stop_name_tc(stop_fetch_data["name_tc"]), proper_stop_name_id(stop_fetch_data["name_en"]), stop_fetch_data["lat"], stop_fetch_data["long"]];
+            localStorage.setItem(label, JSON.stringify(return_data));
+            data_dictionary[label] = Date.now();
+            localStorage.setItem("kmb_data_dictionary", JSON.stringify(data_dictionary));
+        } catch (error) {
+            console.log(error);
+            return_data = ["Name Unavailable", "while stop data is being updated", "", 0, 0];
+        }
     }
     return return_data;
 }
@@ -190,7 +206,8 @@ async function stop_eta_update(stop_id) {
     document.getElementById("stop_eta_disp_eta").replaceChildren();
     document.getElementById("stop_eta_disp_eta").innerHTML = "<p class='text_bold'>Please wait</p>";
     show_stop_dialog(true);
-    stop_eta_display(stop_id, await stop_eta_fetch(stop_id));
+    const stop_eta_data = await stop_eta_fetch(stop_id);
+    stop_eta_display(stop_id, sort_stop_eta_data(stop_eta_data));
 }
 async function find_terminus_index(route, bound, service_type) {
     const object_key = `${route}/${bound}/${service_type}`;
@@ -219,93 +236,98 @@ function show_stop_dialog(show) {
         stop_dialog.close();
     }
 }
-
-
-
-
-
-
-
-
-
 async function stop_eta_fetch(stop_id) {
-    const eta_data = await (await fetch(`${api_base}/stop-eta/${stop_id}`)).json();
-    let eta_presort = {};
-    let eta_rd = {};
-    for (const i of eta_data["data"]) {
-        const rd_string = `${i["route"]}/${i["dir"]}`;
-        const sub_data_id = `${i["route"]}/${i["dir"]}/${i["seq"]}`;
-        let main_temp_isterminate = 0;
-        
-        let dest_string = proper_stop_name_en(i["dest_en"]);
-        let display_type = 0;
+    const stop_eta_fetch_data = await (await fetch(`${api_base}/stop-eta/${stop_id}`)).json();
+    let stop_eta_data = {};
+    for (const i of stop_eta_fetch_data["data"]) {
+        const rte = i["route"];
+        const dir = i["dir"];
+        const rte_dir = `${rte}/${dir}`;
+        const seq = i["seq"];
+        const st = i["service_type"];
+        const st_seq = `${st}/${seq}`;
+        let dest = proper_stop_name_en(i["dest_en"]);
+        let sort_index = 1;
         try {
-            const terminus_index = await find_terminus_index(i["route"], i["dir"], i["service_type"]);
-            if (terminus_index === i["seq"]) {
-                dest_string = "Terminates Here";
-                main_temp_isterminate = 1;
-                display_type = 1;
-            }
-        } catch (e) {
-            console.log(e);
-        }
-        
-
-        if (!eta_rd[rd_string]) {
-            eta_rd[rd_string] = {st: i["service_type"], dest: [dest_string]};
-        }
-        if (eta_rd[rd_string]["st"] === i["service_type"]) {
-            // consider add eta data
-            const eta_list = [i["eta"], i["rmk_en"], i["rmk_tc"]];
-            if (!eta_presort[sub_data_id]) {
-                if (!i["eta"]) {
-                    if (i["rmk_en"]) {
-                        display_type = 2;
-                    } else {
-                        display_type = 3;
-                    }
-                } else {
-                    if (main_temp_isterminate == 1) {
-                        display_type = 1;
-                    } 
-                }
-                const seq = i["seq"];
-                eta_presort[sub_data_id] = [display_type, [eta_list]];
+            if (seq === await find_terminus_index(rte, dir, st)) {
+                dest = "Terminates Here"
             } else {
-                if (eta_presort[sub_data_id][0] === 1 && i["eta"]) {
-                    //eta_presort[sub_data_id][0] = 0;
+                sort_index = 0;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        if (!i["eta"]) {
+            if (i["rmk_en"]) {
+                sort_index = 2;
+            } else {
+                sort_index = 3;
+            }
+        }
+        if (!stop_eta_data[rte_dir]) {
+            stop_eta_data[rte_dir] = {
+                "eta_service_type": st,
+                "st_seq": [],
+                "data": {
+                    [seq]: {
+                        "dest": [dest],
+                        "eta": [],
+                        "sort": sort_index
+                    }
                 }
-                eta_presort[sub_data_id][1].push(eta_list);
-            }
+            };
+        } else if (!stop_eta_data[rte_dir]["data"][seq] && st === stop_eta_data[rte_dir]["eta_service_type"]) {
+            stop_eta_data[rte_dir]["data"][seq] = {"dest": [dest], "eta": [], "sort": sort_index};
+        }
+        if (st === stop_eta_data[rte_dir]["eta_service_type"]) {
+            stop_eta_data[rte_dir]["data"][seq]["eta"].push([i["eta"], i["rmk_en"], i["rmk_tc"]]);
         } else {
-            // add dest if not repeat
-            if (!eta_rd[rd_string]["dest"].includes(dest_string)) {
-                eta_rd[rd_string]["dest"].push(dest_string);
+            if (!stop_eta_data[rte_dir]["st_seq"].includes(st_seq) && dest != "Terminates Here") {
+                curr_loop: for (const [key, value] of Object.entries(stop_eta_data[rte_dir]["data"])) {
+                    if (!value["dest"].includes(dest)) {
+                        value["dest"].push(dest);
+                        break curr_loop;
+                    }
+                }
+            } else if (!stop_eta_data[rte_dir]["st_seq"].includes(st_seq)) {
+                curr_loop: for (const [key, value] of Object.entries(stop_eta_data[rte_dir]["data"]).reverse()) {
+                    if (!value["dest"].includes(dest)) {
+                        value["dest"].push(dest);
+                        break curr_loop;
+                    } else {
+                        break curr_loop;
+                    }
+                }
             }
+        }
+        if (stop_eta_data[rte_dir]["data"][seq] && sort_index < stop_eta_data[rte_dir]["data"][seq]["sort"]) {
+            stop_eta_data[rte_dir]["data"][seq]["sort"] = sort_index;
+        }
+        if (!stop_eta_data[rte_dir]["st_seq"].includes(st_seq)) {
+            stop_eta_data[rte_dir]["st_seq"].push(st_seq);
         }
     }
-    const eta_sorted = Object.entries(eta_presort).sort((a, b) => {
-        return a[1][0] - b[1][0];
-    });
-    return [eta_sorted, eta_rd];
+    return stop_eta_data;
 }
-
-
-function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
-    console.log(eta_sorted);
-    console.log(eta_rd);
+function sort_stop_eta_data(eta_data) {
+    const stop_eta_data_sorted = Object.entries(eta_data).flatMap(([rte_dir, data]) =>
+        Object.entries(data["data"] || {}).map(([stop_seq, stop_data]) =>
+            [rte_dir, stop_seq, stop_data["dest"], stop_data["eta"], stop_data["sort"]]
+        )
+    ).sort((a, b) => a[4] - b[4]);
+    return stop_eta_data_sorted;
+}
+function stop_eta_display(stop_id, stop_eta_data) {
+    console.log(stop_eta_data);
     let results = "<table class='eta_data'>";
-    for (const i of eta_sorted) {
+    for (const i of stop_eta_data) {
         const sub_data = i[0].split("/");
-        const dest_string = eta_rd[`${sub_data[0]}/${sub_data[1]}`]["dest"].join("/ ");
+        const dest_string = i[2].join("/ ");
         let rte_dest_table = `${sub_data[0]} <span class="text_medium title_inline_block">${dest_string}</span>`
-        const display_type = i[1][0];
+        const display_type = i[4];
         if (display_type === 0 || display_type === 1) {
-            if (display_type === 1) {
-                rte_dest_table = `${sub_data[0]} <span class="text_medium title_inline_block">Terminates Here</span>`;
-            }
             let eta_disp_content = "";
-            for (const k of i[1][1]) {
+            for (const k of i[3]) {
                 const eta_time = k[0];
                 const eta_time_mins = time_difference_format(eta_time);
                 const time_data = `<span class="text_bold">${eta_time_mins}</span> <span class="text_small">min</span>`;
@@ -313,7 +335,7 @@ function stop_eta_display(stop_id, [eta_sorted, eta_rd]) {
             }
             results += `<tr><td style="width: clamp(150px, 25%, 200px); max-width: 50%;">${rte_dest_table}</td>${eta_disp_content}</tr>`;
         } else if (display_type === 2) {
-            results += `<tr><td>${rte_dest_table}</td><td colspan="3">${i[1][1][0][1]}</td></tr>`;
+            results += `<tr><td>${rte_dest_table}</td><td colspan="3">${i[3][0][1]}</td></tr>`;
         } else {
             results += `<tr><td>${rte_dest_table}</td><td colspan="3">No Service</td></tr>`;
         }
@@ -371,15 +393,6 @@ function stop_click(i) {
     const doc = parser.parseFromString(results, "text/html");
     document.getElementById("stop_disp_" + i).after(...doc.body.children);
 }
-
-
-
-
-
-
-
-
-
 async function local_storage_item(label, url, validity_period) {
     let data_dictionary = {};
     let return_data;
