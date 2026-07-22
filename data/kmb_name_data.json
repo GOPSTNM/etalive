@@ -1,0 +1,37 @@
+{
+    "replacements_en": {
+        "BBI": "BBI",
+        "Ground Transportation Centre": "GTC",
+        "GTC": "GTC",
+        "II": "II",
+        "HKCECE": "Convention & Exhibition Centre",
+        "HKCEC": "Convention & Exhibition Centre",
+        "HK": "HK",
+        "H.K.": "HK",
+        "O'Brien": "O'Brien",
+        "EKCC": "EKCC",
+        "HACTL": "HACTL",
+        "JPC": "JPC",
+        "UC": "UC",
+        "HKSYU": "HKSYU",
+        "DHC": "District Health Centre",
+        "DHL": "DHL",
+        "CAD": "CAD",
+        "HZMB": "HZMB",
+        "HSBC": "HSBC",
+        "AsiaWorld Expo": "AsiaWorld-Expo",
+        "AsiaWorld-Expo": "AsiaWorld-Expo",
+        "HQ": "HQ",
+        "HKFYG": "HKFYG",
+        "Market)": "Market",
+        "CCC": "CCC",
+        "CLP": "CLP",
+        "RTHK": "RTHK",
+        "YMCA": "YMCA",
+        "CNT": "CNT"
+    },
+    "replacements_tc": {
+        "DHL": "DHL",
+        "II": "II"
+    }
+}
