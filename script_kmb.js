@@ -22,6 +22,7 @@ async function kmb_setup() {
     } catch (error) {
         console.log("Setup data failed.");
         alert("An error occured. Please reload the page.");
+        alert(error);
     }
 }
 async function kmb_setup_eta_page() {
