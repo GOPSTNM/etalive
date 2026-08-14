@@ -1,4 +1,3 @@
-"use strict";
 const kmb_api_base = "https://data.etabus.gov.hk/v1/transport/kmb";
 let kmb_route_eta;
 let kmb_stop_eta;

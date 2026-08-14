@@ -1,4 +1,3 @@
-"use strict";
 let ctb_route_data;
 let ctb_route_eta;
 let ctb_stop_eta;
