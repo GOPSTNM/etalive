@@ -58,8 +58,11 @@ async function kmb_local_storage_item(label, url, validity_period) {
                 if (i < max_fetch_attempt - 1) await new Promise(r => setTimeout(r, 1000));
             }
         }
-        if (error) throw error;
+        try {
         localStorage.setItem(label, JSON.stringify(return_data));
+        } catch (error) {
+            alert(error);
+        }
         data_dictionary[label] = Date.now();
         localStorage.setItem("kmb_data_dictionary", JSON.stringify(data_dictionary))
     }
