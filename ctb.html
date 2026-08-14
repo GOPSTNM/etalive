@@ -2,24 +2,24 @@
 <html lang="en-GB">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KMB Arrival Times</title>
+    <title>CTB Arrival Times</title>
     <link rel="stylesheet" href="style.css">
     <script src="script_nav.js" defer></script>
-    <script src="script_kmb.js" defer></script>
+    <script src="script_ctb.js" defer></script>
   </head>
-  <body onload="kmb_setup_eta_page();">
+  <body onload="ctb_setup_eta_page();">
     <app-navbar></app-navbar>
-    <h1>KMB Arrival Times</h1>
+    <h1>CTB Arrival Times</h1>
     <p>Please input route and select direction.</p>
-    <input type="text" oninput="kmb_rte_input_change();" id="rte_input" autocapitalize="characters" placeholder="Enter Route">
+    <input type="text" oninput="ctb_rte_input_change();" id="rte_input" autocapitalize="characters" placeholder="Enter Route">
     <select id="rte_options_select" required><option value="" selected disabled>Please wait</option></select>
-    <input type="button" onclick="kmb_update();" value="Update">
+    <input type="button" onclick="ctb_update();" value="Update">
     <p id="message_text_area" class="message_text_area"></p>
     <div id="results"></div>
-    <dialog id="stop_eta_disp" onclick="kmb_window_disp_click(event);" class="window_disp">
+    <dialog id="stop_eta_disp" onclick="ctb_window_disp_click(event);" class="window_disp">
       <div class="window_disp_elem">
         <div id="stop_eta_disp_elem"></div>
-        <p class="text_dialog_desc">Click outside the box to exit.</p>
+        <p class="text_dialog_desc">Click outside the box to exit. Routes without ETA at this moment will not be shown.</p>
       </div>
     </dialog>
     <p class="text_page_inst">Click on the stop name to check the arrival times. Click on the stop circle to check the arrival times of all routes at that stop pole.</p>

@@ -16,23 +16,54 @@ p {
 }
 .text_small {
     font-size: 12px;
+    color: #333333;
 }
 .text_bold {
+    font-size: 20px;
     color: #333333;
     font-weight: 700;
 }
 .text_medium {
     font-size: 17px;
+    color: #333333;
 }
-.text_desc {
-    color: #8C8C8C;
+.text_page_desc {
     font-size: 15px;
+    color: #8C8C8C;
 }
-.margin_bottom {
-    margin: 0px 0px 5px 0px;
+.text_page_inst {
+    font-size: 17px;
+    color: #191970;
 }
-.margin_none {
+.message_text_area {
     margin: 0px;
+    font-size: 20px;
+    color: #333333;
+    font-weight: 700;
+}
+.text_name_details {
+    display: inline-block;
+    font-size: 15px;
+    color: #8C8C8C;
+}
+.text_fit_destin {
+    display: block;
+    font-size: clamp(12px, calc(100cqw / var(--chars) * 0.75), 17px);
+    color: #333333;
+    font-weight: 700;
+    width: 100%;
+    line-height: normal;
+}
+.text_dialog_title {
+    margin: 0;
+}
+.text_dialog_title > *:nth-child(2) {
+    text-wrap: nowrap;
+}
+.text_dialog_desc {
+    font-size: 15px;
+    color: #8C8C8C;
+    margin: 0;
 }
 input[type=button] {
     display: inline-block;
@@ -92,15 +123,37 @@ select:invalid {
 input[type=text]:focus, select:focus {
     border: 2px solid #1A7CDB;
 }
-table.eta_data {
+table.eta_table {
     border: none;
     table-layout: fixed;
+    margin: 0px 0px 5px 0px;
 }
-table.eta_data tr {
+table.eta_table tr {
     font-size: 22px;
-    color: #333333;
     height: 30px;
     line-height: 20px;
+}
+div.stop_eta_table {
+    display: flex;
+    flex-direction: column;
+}
+div.stop_eta_table > div {
+    line-height: 20px;
+    font-size: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+div.stop_eta_table > div > div:first-child {
+    flex-shrink: 1;
+    flex-basis: min(300px, 50%);
+}
+div.stop_eta_table > div > div:not(:first-child) {
+    flex-shrink: 5;
+    flex-basis: calc(50% / 3);
+    min-width: 50px;
+    width: calc(50% / 3);
+    max-width: 90px;
 }
 .circle_y {
     flex-shrink: 0;
@@ -120,12 +173,12 @@ table.eta_data tr {
     display: inline-block;
     background-color: #FFFFFF;
 }
-.stop_disp {
+.list_display_stop {
     display: flex;
     align-items: center;
     margin: auto;
 }
-.stop_disp_name {
+.list_display_stop_name {
     margin: 5px 0px 5px 10px;
 }
 .window_disp {
@@ -143,7 +196,4 @@ table.eta_data tr {
 }
 .window_disp_elem {
     padding: 12px;
-}
-.title_inline_block {
-    display: inline-block;
 }
