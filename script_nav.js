@@ -93,6 +93,7 @@ class CustomNavbar extends HTMLElement {
             }
             .navbar-links a {
             direction: ltr;
+            text-align: left;
             color: #ffffff;
             display: block;
             padding: 1rem 1.5rem;
