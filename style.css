@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@200..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap");
-body {
+* {
     background-color: #F0FFFF;
     font-family: "Roboto", "Noto Serif HK";
     font-weight: 580;
@@ -129,6 +129,7 @@ table.eta_table {
     margin: 0px 0px 5px 0px;
 }
 table.eta_table tr {
+    color: #333333;
     font-size: 22px;
     height: 30px;
     line-height: 20px;
@@ -136,11 +137,12 @@ table.eta_table tr {
 div.stop_eta_table {
     display: flex;
     flex-direction: column;
+    gap: 3px;
 }
 div.stop_eta_table > div {
     color: #333333;
     line-height: 20px;
-    font-size: 20px;
+    font-size: 22px;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;

@@ -113,6 +113,7 @@ class CustomNavbar extends HTMLElement {
         <a href="index.html" class="navbar-home">ETA Live</a>
         <button class="navbar-toggle" id="navToggle" aria-label="Toggle menu">&#9776;</button>
         <ul class="navbar-links" id="navLinks">
+            <li><a href="lr.html">Light Rail</a></li>
             <li><a href="kmb.html">KMB</a></li>
             <li><a href="ctb.html">CTB</a></li>
             <li><a href="settings.html">Settings</a></li>

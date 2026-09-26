@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Rail Arrival Times</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script_nav.js" defer></script>
+    <script src="script_lr.js" defer></script>
+  </head>
+  <body onload="lr_setup_eta_page();">
+    <app-navbar></app-navbar>
+    <h1>Light Rail Arrival Times</h1>
+    <p>Please select zone and stop.</p>
+    <select id="lr_zone" oninput="lr_zone_change();">
+      <option value=7 selected>All Zones</option>
+      <option value=6>Tuen Ma Line Interchange</option>
+      <option value=0>Zone 1</option>
+      <option value=1>Zone 2</option>
+      <option value=2>Zone 3</option>
+      <option value=3>Zone 4</option>
+      <option value=4>Zone 5</option>
+      <option value=5>Zone 5A</option>
+    </select>
+    <select id="lr_stop" required><option value="" selected disabled>Please wait</option></select>
+    <input type="button" onclick="lr_update();" value="Update">
+    <p id="message_text_area" class="message_text_area"></p>
+    <div id="results"></div>
+    <p class="text_page_desc">The information is provided by the Digital Policy Office and for reference only.</p>
+  </body>
+</html>

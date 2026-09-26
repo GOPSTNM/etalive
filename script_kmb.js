@@ -173,7 +173,8 @@ async function kmb_to_display() {
     const bound = rte_options_select.value[0];
     const service_type = rte_options_select.value[1];
     const route = document.getElementById("rte_input").value.toUpperCase();
-    const stop_list = (await (await fetch(`${kmb_api_base}/route-stop/${route}/${bound == "I" ? "inbound" : "outbound"}/${service_type}`)).json())["data"];
+    const stop_data_url = `${kmb_api_base}/route-stop/${route}/${bound == "I" ? "inbound" : "outbound"}/${service_type}`;
+    const stop_list = (await kmb_local_storage_item(`kmb_rte_stop_list/${route}/${bound}/${service_type}`, stop_data_url, 7))["data"];
     let stop_names = [];
     for (const i of stop_list) {
         stop_names[i["seq"] - 1] = kmb_get_stop_data(i["stop"]);
@@ -200,7 +201,7 @@ function kmb_stop_click(i) {
         return;
     }
     let results = "";
-    if (kmb_route_eta[i]) {
+    if (kmb_route_eta[i][0][0]) {
         results += `<table class='eta_table' id='stop_table_${i}'>`;
         for (const k of kmb_route_eta[i]) {
             const eta_time = k[0];
@@ -226,8 +227,8 @@ function kmb_stop_click(i) {
                 }
             }
             results += "<tr>";
-            results += `<td style="width: 105px;">${time_str}</td>`;
-            results += `<td style="width: 85px;">${mins_str}</td>`;
+            results += `<td style="width: 130px;">${time_str}</td>`;
+            results += `<td style="width: 100px;">${mins_str}</td>`;
             results += `<td style="width: max-content;">${rmk_str}</td>`;
             results += "</tr>";
         }
@@ -271,7 +272,6 @@ function kmb_show_stop_dialog(show) {
     }
 }
 async function kmb_stop_update(stop_id) {
-    console.log(stop_id);
     let dialog_results = "";
     for (const i of stop_id) {
         const stop_name_data = await kmb_get_stop_data(i);
@@ -370,7 +370,6 @@ async function kmb_stop_update_fetch(stop_id) {
     return stop_eta_data_sorted;
 }
 function kmb_stop_to_display() {
-    console.log(kmb_stop_eta);
     for (const [key, data] of Object.entries(kmb_stop_eta)) {
         let results = "<div class='stop_eta_table'>";
         for (const i of data) {
