@@ -188,12 +188,16 @@ async function kmb_to_display() {
         }
         results += `<div class='circle_${circ_colour}' onclick='kmb_stop_update(["${stop_list[seq]["stop"]}"]);'></div>`;
         results += `<div onclick='kmb_stop_click(${seq});'>`;
-        results += `<p class='list_display_stop_name'><span class='text_bold'>${seq}</span> ${stop_names[seq][0]} <span class='text_name_details'>${stop_names[seq][2]}</span></p>`;
+        results += `<p class='list_display_stop_name'><span class='text_bold' onclick='kmb_stop_dblclick(["${stop_list[seq]["stop"]}"]);'>${seq}</span> ${stop_names[seq][0]} <span class='text_name_details'>${stop_names[seq][2]}</span></p>`;
         results += "</div>";
         results += "</div>";
     }
     document.getElementById("message_text_area").innerHTML = "";
     document.getElementById("results").innerHTML = results;
+}
+function kmb_stop_dblclick(stop_id) {
+    let stop_data = kmb_get_stop_data(stop_id);
+    navigator.clipboard.writeText(stop_data[1]);
 }
 function kmb_stop_click(i) {
     if (document.getElementById(`stop_table_${i}`)) {

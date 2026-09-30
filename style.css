@@ -78,7 +78,6 @@ input[type=button] {
     border-radius: 8px;
     text-align: center;
     cursor: pointer;
-    line-height: 20px;
 }
 input[type=text] {
     display: inline-block;
@@ -96,7 +95,6 @@ input[type=text] {
     text-align: left;
     padding: 0 0 0 10px;
     cursor: text;
-    line-height: 20px; line-height: 20px;
 }
 select {
     display: inline-block;
@@ -118,7 +116,6 @@ select {
     -moz-appearance: none;
     -webkit-appearance: none;
     -ms-progress-appearance: none;
-    line-height: 20px;
 }
 select:invalid {
     color: #8C8C8C;
