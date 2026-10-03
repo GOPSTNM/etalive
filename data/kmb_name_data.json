@@ -28,7 +28,9 @@
         "CLP": "CLP",
         "RTHK": "RTHK",
         "YMCA": "YMCA",
-        "CNT": "CNT"
+        "CNT": "CNT",
+        "EMSD": "EMSD",
+        "HKU": "HKU"
     },
     "replacements_tc": {
         "DHL": "DHL",
