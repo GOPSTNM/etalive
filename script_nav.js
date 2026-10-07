@@ -116,6 +116,7 @@ class CustomNavbar extends HTMLElement {
             <li><a href="lr.html">Light Rail</a></li>
             <li><a href="kmb.html">KMB</a></li>
             <li><a href="ctb.html">CTB</a></li>
+            <li><a href="stop_name.html">Search Stop</a></li>
             <li><a href="settings.html">Settings</a></li>
         </ul>
         </nav>

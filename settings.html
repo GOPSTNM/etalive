@@ -5,17 +5,12 @@
     <title>ETA Live - Settings</title>
     <link rel="stylesheet" href="style.css">
     <script src="script_nav.js" defer></script>
+    <script src="script_settings.js" defer></script>
   </head>
   <body>
     <app-navbar></app-navbar>
     <h1>Settings</h1>
     <p>General</p>
     <input type="button" value="Clear Local Storage" onclick="clear_localstorage();">
-    <script>
-      function clear_localstorage() {
-        localStorage.clear();
-        alert("Cleared.");
-      }
-    </script>
   </body>
 </html>

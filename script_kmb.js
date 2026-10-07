@@ -7,6 +7,14 @@ let kmb_stop_name_data;
 let kmb_route_terminus_data = {};
 let kmb_route_eta_refresh;
 let kmb_stop_eta_refresh;
+async function test() {
+    let data = await (await fetch(`${kmb_api_base}/stop/`)).json();
+    let upddata = data["data"].map(({ stop, lat, long, name_en, name_tc }) => ({ stop, lat, long, name_en, name_tc }));
+    console.log(data);
+    console.log(upddata);
+    console.log(new TextEncoder().encode(JSON.stringify(data)).length);
+    console.log(new TextEncoder().encode(JSON.stringify(upddata)).length);
+}
 async function kmb_setup() {
     try {
         [kmb_route_data, kmb_stop_data, kmb_stop_name_data] = await Promise.all([
@@ -227,7 +235,7 @@ function kmb_stop_click(i) {
                     mins_str = `<span class="text_bold">${eta_time_mins}</span> <span class="text_small">min</span>`;
                 }
                 if (k[1]) {
-                    rmk_str += `<span class='text_medium'>${k[1]}</span>`;
+                    rmk_str = `<span class='text_fit_rmk' style='--chars: ${k[1].length}'>${k[1]}</span>`;
                 }
             }
             results += "<tr>";

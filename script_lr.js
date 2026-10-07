@@ -1,6 +1,5 @@
 let lr_stop_data;
 let lr_stop_eta;
-let lr_stop_eta_refresh;
 async function lr_setup() {
     await fetch("https://gopstnm.github.io/etalive/data/lr_stop_data.json")
         .then(response => {
@@ -91,7 +90,7 @@ function lr_to_display() {
                 results += `<td style="width: 75px;">${car_str}</td>`;
                 results += `<td style="width: 80px;">${time_str}</td>`;
                 results += "</tr>";
-                results += `<tr><td colspan='4' class='text_fit_destin'>${k["route_no"]} ${k["routeRemarkEng2"]}</td></tr>`;
+                results += `<tr><td colspan='4' class='text_page_desc'>${k["route_no"]} ${k["routeRemarkEng2"]}</td></tr>`;
             }
         }
     }
