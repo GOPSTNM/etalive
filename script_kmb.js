@@ -241,7 +241,7 @@ function kmb_stop_click(i) {
             results += "<tr>";
             results += `<td style="width: 130px;">${time_str}</td>`;
             results += `<td style="width: 100px;">${mins_str}</td>`;
-            results += `<td style="width: max-content;">${rmk_str}</td>`;
+            results += `<td style="width: 100%-230px;">${rmk_str}</td>`;
             results += "</tr>";
         }
         results += "</table>";
