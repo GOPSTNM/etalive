@@ -48,12 +48,14 @@ p {
 }
 .text_fit_destin {
     color: #333333;
+    line-height: 1;
     font-size: clamp(12px, calc(100cqw / var(--chars) * 0.75), 17px);
     font-weight: 700;
 }
 .text_fit_rmk {
     color: #333333;
-    font-size: clamp(12px, calc(100cqw / var(--chars) * 0.75), 17px);
+    line-height: 1;
+    font-size: clamp(14px, calc(100cqw / var(--chars) * 0.75), 17px);
 }
 .text_dialog_title {
     margin: 0;
