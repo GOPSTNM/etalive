@@ -53,8 +53,9 @@ p {
     width: 100%;
     line-height: normal;
     word-break: break-all;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
     word-break: break-all;
+    white-space: normal;
     font-weight: 700;
 }
 .text_fit_rmk {
@@ -64,8 +65,9 @@ p {
     width: 100%;
     line-height: normal;
     word-break: break-all;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
     word-break: break-all;
+    white-space: normal;
 }
 .text_dialog_title {
     margin: 0;
