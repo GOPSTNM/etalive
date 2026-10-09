@@ -162,7 +162,7 @@ function ctb_stop_click(i) {
             results += "<tr>";
             results += `<td style="width: 105px;">${time_str}</td>`;
             results += `<td style="width: 85px;">${mins_str}</td>`;
-            results += `<td style="width: max-content;">${rmk_str}</td>`;
+            results += `<td style="width: 100%-190px;">${rmk_str}</td>`;
             results += "</tr>";
         }
         results += "</table>";
