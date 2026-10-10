@@ -35,5 +35,11 @@
     "replacements_tc": {
         "DHL": "DHL",
         "II": "II"
+    },
+    "rte_rmk_en": {
+        "The final bus has departed from this stop": "Final bus departed",
+        "This route only operates on Mondays to Fridays (Except Public Holidays)": "Mon-Fri (Ex PH) only",
+        "This route only operates on Race Days": "Race Days only",
+        "This route only operates on Sundays and Public Holidays": "Sun & PH only"
     }
 }
