@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@200..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap");
-* {
+body {
     background-color: #F0FFFF;
     font-family: "Roboto", "Noto Serif HK";
     font-weight: 580;
@@ -70,7 +70,7 @@ p {
 }
 input[type=button], input[type=text], select {
     vertical-align: bottom;
-    line-height: 20px;
+    line-height: 41px;
 }
 input[type=button] {
     display: inline-block;
