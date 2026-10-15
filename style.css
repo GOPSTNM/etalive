@@ -2,6 +2,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap");
 body {
     background-color: #F0FFFF;
+}
+* {
     font-family: "Roboto", "Noto Serif HK";
     font-weight: 580;
 }
