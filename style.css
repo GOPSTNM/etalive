@@ -72,7 +72,7 @@ p {
 }
 input[type=button], input[type=text], select {
     vertical-align: bottom;
-    line-height: 41px;
+    line-height: min(normal, 41px);
 }
 input[type=button] {
     display: inline-block;
