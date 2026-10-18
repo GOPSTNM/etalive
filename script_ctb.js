@@ -55,7 +55,6 @@ async function ctb_get_stop_data(stop_id) {
     stop_data["lat"], stop_data["long"]];
 }
 async function ctb_rte_input_change() {
-    window.ctb_rte_input_changeable = 0;
     const rte_input = document.getElementById("rte_input").value;
     const rte_options_select = document.getElementById("rte_options_select");
     document.getElementById("rte_input").value = rte_input.toUpperCase();
@@ -66,6 +65,7 @@ async function ctb_rte_input_change() {
     for (const rte_data of ctb_route_data["data"]) {
         if (rte_data["route"] == rte_input.toUpperCase()) {
             rte_options_select.innerHTML = "<option value='' selected disabled>Please wait</option>";
+            window.ctb_rte_input_changeable = 0;
             const inbound_data = await ctb_get_route_stop(rte_input, "I");
             if (!window.ctb_rte_input_changeable === 1) {
                 return;
