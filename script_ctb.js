@@ -55,6 +55,7 @@ async function ctb_get_stop_data(stop_id) {
     stop_data["lat"], stop_data["long"]];
 }
 async function ctb_rte_input_change() {
+    window.ctb_rte_input_changeable = 0;
     const rte_input = document.getElementById("rte_input").value;
     const rte_options_select = document.getElementById("rte_options_select");
     document.getElementById("rte_input").value = rte_input.toUpperCase();
@@ -66,6 +67,9 @@ async function ctb_rte_input_change() {
         if (rte_data["route"] == rte_input.toUpperCase()) {
             rte_options_select.innerHTML = "<option value='' selected disabled>Please wait</option>";
             const inbound_data = await ctb_get_route_stop(rte_input, "I");
+            if (!window.ctb_rte_input_changeable === 1) {
+                return;
+            }
             rte_options_select.innerHTML = "<option value='' selected disabled>Select Direction</option>";
             let rte_str = `${rte_data["orig_en"]} to ${rte_data["dest_en"]}`
             rte_options_select.append(new Option(rte_str, "O", false, true));
@@ -73,6 +77,7 @@ async function ctb_rte_input_change() {
                 rte_str = `${rte_data["dest_en"]} to ${rte_data["orig_en"]}`
                 rte_options_select.append(new Option(rte_str, "I", false, false));
             }
+            window.ctb_rte_input_changeable = 1;
         }
     }
 }
