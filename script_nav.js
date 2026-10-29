@@ -89,6 +89,7 @@ class CustomNavbar extends HTMLElement {
             transition: left 0.3s ease;
             overflow-y: auto;
             direction: rtl;
+            shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
             }
             .navbar-links a {
             direction: ltr;
