@@ -79,7 +79,7 @@ class CustomNavbar extends HTMLElement {
             z-index: 1;
             position: fixed;
             top: 0;
-            left: -250px;
+            left: -260px;
             width: 250px;
             height: 100vh;
             background-color: #003d80;
