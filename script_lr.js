@@ -1,13 +1,13 @@
 let lr_stop_data;
 let lr_stop_eta;
 async function lr_setup() {
-    await fetch("https://gopstnm.github.io/etalive/data/lr_stop_data.json")
-        .then(response => {
-            return response.json();
-        })
-        .then(data => {
-            lr_stop_data = data;
-        });
+    try {
+        lr_stop_data = await lr_local_storage_item("lr_stop_data", "https://gopstnm.github.io/etalive/data/lr_stop_data.json", 30);
+        console.log("Setup data completed.");
+    } catch (error) {
+        console.log("Setup data failed.");
+        alert("An error occured. Please reload the page.");
+    }
 }
 async function lr_setup_eta_page() {
     await lr_setup();
@@ -17,6 +17,34 @@ async function lr_setup_eta_page() {
         document.getElementById("lr_stop").value = url_params.get("s");
         lr_update();
     }
+}
+async function lr_local_storage_item(label, url, validity_period) {
+    const max_fetch_attempt = 10;
+    let data_dictionary = {};
+    let return_data;
+    if (localStorage.getItem("lr_data_dictionary")) {
+        data_dictionary = JSON.parse(localStorage.getItem("lr_data_dictionary"));
+    }
+    if (data_dictionary[label] && localStorage.getItem(label) && (Date.now() - data_dictionary[label]) < (validity_period * 86400000)) {
+        return_data = JSON.parse(localStorage.getItem(label));
+    } else {
+        let error;
+        for (let i = 0; i < max_fetch_attempt; i++) {
+            try {
+                return_data = await fetch(url).then(r => r.ok ? r.json() : Promise.reject(r));
+                error = null;
+                break;
+            } catch (e) {
+                error = e;
+                if (i < max_fetch_attempt - 1) await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+        if (error) throw error;
+        localStorage.setItem(label, JSON.stringify(return_data));
+        data_dictionary[label] = Date.now();
+        localStorage.setItem("lr_data_dictionary", JSON.stringify(data_dictionary))
+    }
+    return return_data;
 }
 function lr_zone_change() {
     if (document.getElementById("lr_zone").value == 7) {
@@ -49,6 +77,7 @@ async function lr_update() {
     } catch (error) {
         console.log(error);
         document.getElementById("message_text_area").innerHTML = "An error occurred, please reload and try again.";
+        localStorage.removeItem("lr_data_dictionary");
     }
 }
 function lr_to_display() {
