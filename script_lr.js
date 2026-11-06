@@ -6,6 +6,7 @@ async function lr_setup() {
         console.log("Setup data completed.");
     } catch (error) {
         console.log("Setup data failed.");
+        document.getElementById("message_text_area").innerHTML = "An error occured. Please reload the page.";
         alert("An error occured. Please reload the page.");
     }
 }
