@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="utf-8" />
+   <title>Map</title>
+   <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+   <link rel="stylesheet" href="style.css">
+   <style>
+       html,
+       body {
+           width: 100%;
+           height: 100%;
+           margin: 0;
+       }
+
+       #map {
+           width: 100%;
+           height: 100%;
+       }
+
+       .esri-attribution {
+           background-color: transparent;
+       }
+
+       .esri-attribution__powered-by {
+           display: none;
+       }
+
+       .esri-attribution a {
+           color: black;
+       }
+
+       .esri-attribution {
+           background-color: transparent;
+           font-size: 12px;
+           font-family: sans-serif;
+           color: black;
+       }
+
+       .copyright-url {
+           position: absolute;
+           bottom: 5px;
+           right: 40px;
+           padding: 0 4px;
+           font-family: sans-serif;
+           font-size: 12px;
+       }
+
+       .copyright-logo {
+           position: absolute;
+           bottom: 5px;
+           right: 10px;
+           width: 28px;
+           height: 28px;
+           display: inline-flex;
+           background: url(https://api.hkmapservice.gov.hk/mapapi/landsdlogo.jpg);
+           background-size: 28px;
+       }
+   </style>
+</head>
+
+<body>
+   <div id="map" class="map"></div>
+
+   <dialog id="stop_eta_disp" onclick="kmb_window_disp_click(event);" class="window_disp">
+       <div id="stop_eta_disp_elem" class="window_disp_elem">
+           <p class="margin_none" id="stop_eta_disp_title"></p>
+           <div id="stop_eta_disp_eta"></div>
+           <p class="text_desc margin_none">Click outside the box to exit.</p>
+       </div>
+   </dialog>
+
+   <script src="script_kmb.js"></script>
+   <script src="https://js.arcgis.com/4.29/"></script>
+
+   <script>
+       var map_kmb_stop_data = [];
+       kmb_setup().then(() => {
+           map_kmb_stop_data = kmb_stop_data.data;
+       });
+
+       // Haversine formula (meters) between two Lat/Long points
+       function getHaversineDistance(lat1, lon1, lat2, lon2) {
+           const R = 6371000;
+           const dLat = (lat2 - lat1) * Math.PI / 180;
+           const dLon = (lon2 - lon1) * Math.PI / 180;
+           const a = 
+               Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+               Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+               Math.sin(dLon / 2) * Math.sin(dLon / 2);
+           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+           return R * c; 
+       }
+
+       require([
+           "esri/Map", 
+           "esri/Basemap", 
+           "esri/layers/VectorTileLayer",
+           "esri/views/MapView",
+           "esri/geometry/Point",
+           "esri/layers/GraphicsLayer",
+           "esri/Graphic",
+           "esri/geometry/Circle"
+       ], function (
+           Map, Basemap, VectorTileLayer, MapView, Point, 
+           GraphicsLayer, Graphic, Circle
+       ) {
+           const basemapVTURL = "https://mapapi.geodata.gov.hk/gs/api/v1.0.0/vt/basemap/WGS84";
+           const mapLabelVTUrl = "https://mapapi.geodata.gov.hk/gs/api/v1.0.0/vt/label/hk/tc/WGS84";
+
+           const basemap = new Basemap({
+               baseLayers: [
+                   new VectorTileLayer({
+                       url: basemapVTURL,
+                       copyright: '<a href="https://api.portal.hkmapservice.gov.hk/disclaimer" target="_blank" class="copyright-url">&copy; 地圖資料由地政總署提供</a><div class="copyright-logo"></div>'
+                   })
+               ]
+           });
+
+           // Graphics layer for drawing circle and bus stop markers
+           const graphicsLayer = new GraphicsLayer();
+
+           const map = new Map({
+               basemap: basemap,
+               layers: [graphicsLayer]
+           });
+
+           map.add(new VectorTileLayer(mapLabelVTUrl));
+
+           const mView = new MapView({
+               container: "map",
+               map: map,
+               zoom: 17,
+               center: [114.20847, 22.29227],
+               constraints: {
+                   minZoom: 10,
+                   maxZoom: 20
+               }
+           });
+
+           const RADIUS_METERS = 500;
+
+           mView.on("click", async function (evt) {
+               // 1. Check if user clicked an existing bus stop marker
+               const hitResponse = await mView.hitTest(evt);
+               const graphicHit = hitResponse.results.find(res => res.graphic && res.graphic.attributes && res.graphic.attributes.stop_id);
+
+               if (graphicHit) {
+                   const stop_id = graphicHit.graphic.attributes.stop_id;
+                   if (typeof stop_eta_update === 'function') {
+                       stop_eta_update(stop_id);
+                   }
+                   return; // Prevent redrawing the circle when clicking a marker
+               }
+
+               // 2. Clear previous drawings
+               graphicsLayer.removeAll();
+
+               // 3. Draw search circle on map
+               const circleGeometry = new Circle({
+                   center: evt.mapPoint,
+                   radius: RADIUS_METERS,
+                   radiusUnit: "meters",
+                   geodesic: true
+               });
+
+               const circleGraphic = new Graphic({
+                   geometry: circleGeometry,
+                   symbol: {
+                       type: "simple-fill",
+                       color: [226, 119, 40, 0.25],
+                       outline: { color: [226, 119, 40], width: 2 }
+                   }
+               });
+
+               graphicsLayer.add(circleGraphic);
+
+               // 4. Filter KMB stops within distance
+               if (map_kmb_stop_data && map_kmb_stop_data.length > 0) {
+                   const clickLat = evt.mapPoint.latitude;
+                   const clickLon = evt.mapPoint.longitude;
+                   const nearbyStops = [];
+
+                   map_kmb_stop_data.forEach(function (stop) {
+                       const stopLat = parseFloat(stop.lat);
+                       const stopLong = parseFloat(stop.long);
+                       const stopNameEn = stop.name_en;
+                       const stop_id = stop["stop"];
+
+                       if (isNaN(stopLat) || isNaN(stopLong)) return;
+
+                       const distance = getHaversineDistance(clickLat, clickLon, stopLat, stopLong);
+
+                       if (distance <= RADIUS_METERS) {
+                           nearbyStops.push(stop);
+
+                           const stopPoint = new Point({
+                               latitude: stopLat,
+                               longitude: stopLong,
+                               spatialReference: { wkid: 4326 }
+                           });
+
+                           // Blue Dot Marker Graphic
+                           const markerGraphic = new Graphic({
+                               geometry: stopPoint,
+                               attributes: {
+                                   stop_id: stop_id,
+                                   name_en: stopNameEn
+                               },
+                               symbol: {
+                                   type: "simple-marker",
+                                   color: [0, 122, 255],
+                                   size: 10,
+                                   outline: { color: [255, 255, 255], width: 1.5 }
+                               }
+                           });
+
+                           // Formatted English Text Label Graphic
+                           const formattedText = (typeof proper_stop_name_en === 'function') 
+                               ? proper_stop_name_en(stopNameEn) 
+                               : stopNameEn;
+
+                           const textGraphic = new Graphic({
+                               geometry: stopPoint,
+                               attributes: {
+                                   stop_id: stop_id 
+                               },
+                               symbol: {
+                                   type: "text",
+                                   color: "black",
+                                   haloColor: "white",
+                                   haloSize: "2px",
+                                   text: formattedText || "",
+                                   yoffset: 12,
+                                   font: {
+                                       size: 10,
+                                       weight: "bold",
+                                       family: "sans-serif"
+                                   }
+                               }
+                           });
+
+                           graphicsLayer.add(markerGraphic);
+                           graphicsLayer.add(textGraphic);
+                       }
+                   });
+
+                   console.log(`Found ${nearbyStops.length} stops within ${RADIUS_METERS}m:`, nearbyStops);
+               }
+           });
+       });
+   </script>
+</body>
+
+</html>
