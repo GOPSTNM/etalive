@@ -7,9 +7,9 @@ function sn_update() {
         }
     }
     search_results.sort((a, b) => a[2].localeCompare(b[2]));
+    let results = "";
     for (const i of search_results) {
         if (i[0] === "K") {
-            let results = "";
             results += `<div id="stop_disp_" class="list_display_stop">`;
             let circ_colour = "y";
             results += `<div class='circle_${circ_colour}' onclick='kmb_stop_update(["${i[1]}"]);'></div>`;
