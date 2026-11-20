@@ -1,4 +1,4 @@
-function stop_name_update() {
+function sn_update() {
     document.getElementById("message_text_area").innerHTML = "Please wait";
     let results = "";
     for (const i of kmb_stop_data["data"]) {
