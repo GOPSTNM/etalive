@@ -6,7 +6,7 @@ function sn_update() {
             search_results.push(["K", i["stop"], i["name_en"]]);
         }
     }
-    search_results.sort((a, b) => a[2].localecompare(b[2]));
+    search_results.sort((a, b) => a[2].localeCompare(b[2]));
     for (const i of search_results) {
         if (i[0] === "K") {
             let results = "";
