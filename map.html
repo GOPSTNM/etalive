@@ -149,7 +149,7 @@
 
                if (graphicHit) {
                    const stop_id = graphicHit.graphic.attributes.stop_id;
-                   if (typeof stop_eta_update === 'function') {
+                   if (typeof kmb_stop_update === 'function') {
                        kmb_stop_update(stop_id);
                    }
                    return; // Prevent redrawing the circle when clicking a marker
