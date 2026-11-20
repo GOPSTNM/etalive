@@ -5,8 +5,6 @@ let kmb_route_data;
 let kmb_stop_data;
 let kmb_stop_name_data;
 let kmb_route_terminus_data = {};
-let kmb_route_eta_refresh;
-let kmb_stop_eta_refresh;
 async function test() {
     let data = await (await fetch(`${kmb_api_base}/stop/`)).json();
     let upddata = data["data"].map(({ stop, lat, long, name_en, name_tc }) => ({ stop, lat, long, name_en, name_tc }));
@@ -27,6 +25,7 @@ async function kmb_setup() {
         prepare_get_stop_data();
     } catch (error) {
         console.log("Setup data failed.");
+        document.getElementById("message_text_area").innerHTML = "An error occured. Please reload the page.";
         alert("An error occured. Please reload the page.");
     }
 }
@@ -43,7 +42,7 @@ async function kmb_setup_eta_page() {
     }
 }
 async function kmb_local_storage_item(label, url, validity_period) {
-    const max_fetch_attempt = 10;
+    const max_fetch_attempt = 20;
     let data_dictionary = {};
     let return_data;
     if (localStorage.getItem("kmb_data_dictionary")) {
@@ -60,7 +59,7 @@ async function kmb_local_storage_item(label, url, validity_period) {
                 break;
             } catch (e) {
                 error = e;
-                if (i < max_fetch_attempt - 1) await new Promise(r => setTimeout(r, 1000));
+                if (i < max_fetch_attempt - 1) await new Promise(r => setTimeout(r, 2000));
             }
         }
         if (error) throw error;
@@ -108,6 +107,9 @@ function prepare_name_replacements() {
         });
     }
     window.kmb_proper_stop_name_id = function (name) {
+        if (!name) {
+            return "";
+        }
         const pole_id = name.match(name_pole_id_regex);
         return pole_id ? pole_id[1] : "";
     }
@@ -394,7 +396,11 @@ function kmb_stop_to_display() {
                     }
                 }
             } else if (display_type === 2) {
-                results += `<div class='stop_eta_table_no_eta'>${i[3][0][1]}</div>`;
+                if (kmb_stop_name_data["rte_rmk_en"][i[3][0][1]]) {
+                    results += `<div class='stop_eta_table_no_eta'>${kmb_stop_name_data["rte_rmk_en"][i[3][0][1]]}</div>`;
+                } else {
+                    kmb_stop_name_data["rte_rmk_en"][i[3][0][1]]
+                }
             } else {
                 results += `<div class='stop_eta_table_no_eta'>No Service</div>`;
             }
