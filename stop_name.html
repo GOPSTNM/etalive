@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Stop By Name</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script_nav.js" defer></script>
+    <script src="script_stop_name.js" defer></script>
+    <script src="script_kmb.js" defer></script>
+  </head>
+  <body onload="kmb_setup();">
+    <app-navbar></app-navbar>
+    <h1>Search Stop By Name</h1>
+    <p>Please input stop name.</p>
+    <input type="text" id="name_input" placeholder="Enter Name">
+    <input type="button" onclick="stop_name_update();" value="Search">
+    <p id="message_text_area" class="message_text_area"></p>
+    <div id="results"></div>
+    <dialog id="stop_eta_disp" onclick="kmb_window_disp_click(event);" class="window_disp">
+      <div class="window_disp_elem">
+        <div id="stop_eta_disp_elem"></div>
+        <p class="text_dialog_desc">Click outside the box to exit.</p>
+      </div>
+    </dialog>
+    <p class="text_page_inst">Click on the stop circle to check the arrival times of all routes at that stop pole.</p>
+    <p class="text_page_desc">The information is provided by the Digital Policy Office and for reference only.</p>
+  </body>
+</html>
