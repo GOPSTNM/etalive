@@ -150,7 +150,7 @@
                if (graphicHit) {
                    const stop_id = graphicHit.graphic.attributes.stop_id;
                    if (typeof stop_eta_update === 'function') {
-                       stop_eta_update(stop_id);
+                       kmb_stop_eta_update(stop_id);
                    }
                    return; // Prevent redrawing the circle when clicking a marker
                }
@@ -218,8 +218,8 @@
                            });
 
                            // Formatted English Text Label Graphic
-                           const formattedText = (typeof proper_stop_name_en === 'function') 
-                               ? proper_stop_name_en(stopNameEn) 
+                           const formattedText = (typeof kmb_proper_stop_name_en === 'function') 
+                               ? kmb_proper_stop_name_en(stopNameEn) 
                                : stopNameEn;
 
                            const textGraphic = new Graphic({
