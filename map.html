@@ -76,6 +76,7 @@
    <script src="https://js.arcgis.com/4.29/"></script>
 
    <script>
+       try {
        var map_kmb_stop_data = [];
        kmb_setup().then(() => {
            map_kmb_stop_data = kmb_stop_data.data;
@@ -251,6 +252,9 @@
                }
            });
        });
+       } catch (e) {
+           alert(e);
+       }
    </script>
 </body>
 
