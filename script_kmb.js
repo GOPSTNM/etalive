@@ -399,7 +399,7 @@ function kmb_stop_to_display() {
                 if (kmb_stop_name_data["rte_rmk_en"][i[3][0][1]]) {
                     results += `<div class='stop_eta_table_no_eta'>${kmb_stop_name_data["rte_rmk_en"][i[3][0][1]]}</div>`;
                 } else {
-                    kmb_stop_name_data["rte_rmk_en"][i[3][0][1]]
+                    results += `<div class='stop_eta_table_no_eta'>${i[3][0][1]}</div>`;
                 }
             } else {
                 results += `<div class='stop_eta_table_no_eta'>No Service</div>`;
