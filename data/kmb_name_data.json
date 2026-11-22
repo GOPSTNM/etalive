@@ -41,6 +41,7 @@
         "This route only operates on Mondays to Fridays (Except Public Holidays)": "Mon-Fri (Ex PH) only",
         "This route only operates on Race Days": "Race Days only",
         "This route only operates on Sundays and Public Holidays": "Sun & PH only",
-        "This route only operates on Saturdays, Sundays and Public Holidays": "Sat, Sun & PH only"
+        "This route only operates on Saturdays, Sundays and Public Holidays": "Sat, Sun & PH only",
+        "This route only operates on Mondays to Saturdays (Except Public Holidays)": "Mon-Sat (Ex PH) only"
     }
 }
